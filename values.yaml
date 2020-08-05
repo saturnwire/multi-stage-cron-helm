@@ -21,6 +21,7 @@ containers:
   resources: {}
   extraEnvironmentVars: {}
   extraSecretEnvironmentVars: {}
+  extraExistingSecretEnvironmentVars: {}
   script: |
     #!/bin/sh
     set -eu
@@ -36,7 +37,14 @@ containers:
     tag: 2.0.18
   resources: {}
   extraEnvironmentVars: {}
+  # AWS_S3_BUCKET: my-bucket
+  # AWS_ACCESS_KEY_ID: abc123
   extraSecretEnvironmentVars: {}
+  # AWS_SECRET_ACCESS_KEY: supersecret
+  extraExistingSecretEnvironmentVars: {}
+  # MY_PASSORD: 
+  #   secretName:
+  #   secretKey:
   script: |
     #!/bin/sh
     set -eu

@@ -36,6 +36,13 @@ spec:
                   name: {{ $fullName }}-{{ $key }}
                   key: {{ $envKey }}
             {{- end }}
+            {{- range $envKey, $envValue := $value.extraExistingSecretEnvironmentVars }}
+            - name: {{ $envKey }}
+              valueFrom:
+                secretKeyRef:
+                  name: {{ $envValue.secretName }}
+                  key: {{ $envValue.secretKey }}
+            {{- end }}            
             resources:
               {{- toYaml $value.resources | nindent 14 }}
             volumeMounts:
