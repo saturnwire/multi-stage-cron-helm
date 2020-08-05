@@ -1,3 +1,4 @@
+{{- $root := . -}}
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -5,7 +6,7 @@ metadata:
   labels:
     {{ include "cron-backup.labels" . | nindent 4 }}
 data:
-  snapshot.sh: |
-    {{- tpl .Values.snapshot.script . | nindent 4 }}
-  upload.sh: |
-    {{- tpl .Values.upload.script . | nindent 4 }}
+  {{- range $key, $value := .Values.containers }}
+  {{ $value.name }}.sh: |
+    {{- tpl $value.script $root | nindent 4 }}
+  {{- end }}

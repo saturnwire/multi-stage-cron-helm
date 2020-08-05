@@ -12,7 +12,8 @@ backup:
 
   # This is how long the backup process can run (including restarts) before the job controller kills it
   activeDeadlineSeconds: 120
-snapshot:
+containers:
+- name: snapshot
   image:
     repository: bash
     pullPolicy: IfNotPresent
@@ -26,9 +27,9 @@ snapshot:
     echo "Creating snapshot..."
     touch /tmp/example
     tar -czvf /tmp/snapshot.tar.gz /tmp/example
-    mv /tmp/snapshot.tar.gz /snapshot/snapshot.tar.gz
+    mv /tmp/snapshot.tar.gz /backups/snapshot.tar.gz
     echo "Snapshot complete"
-upload:
+- name: upload
   image:
     repository: amazon/aws-cli
     pullPolicy: IfNotPresent
@@ -39,12 +40,12 @@ upload:
   script: |
     #!/bin/sh
     set -eu
-    while [ ! -f /snapshot/snapshot.tar.gz ]
+    while [ ! -f /backups/snapshot.tar.gz ]
     do
       echo "Waiting for snapshot to finish..."
       sleep 1
     done
     # S3_KEY=database/{{ .Release.Namespace }}/{{ .Release.Name }}/snapshot_$(date +%Y%m%d_%H%M%S).snap
     # echo "Uploading snapshot to ${AWS_S3_BUCKET}/${AWS_S3_KEY}"
-    # aws s3api put-object --bucket ${AWS_S3_BUCKET} --key ${AWS_S3_KEY} --body /snapshot/backup.snap
+    # aws s3api put-object --bucket ${AWS_S3_BUCKET} --key ${AWS_S3_KEY} --body /backups/backup.snap
     # echo "Upload Complete"

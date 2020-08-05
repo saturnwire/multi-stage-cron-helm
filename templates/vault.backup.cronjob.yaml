@@ -19,56 +19,35 @@ spec:
         spec:
           restartPolicy: OnFailure
           containers:
-          - name: snapshot
-            image: {{ .Values.snapshot.image.repository }}:{{ .Values.snapshot.image.tag }}
-            imagePullPolicy: {{ .Values.snapshot.image.pullPolicy }}
-            command: ["/scripts/snapshot.sh"]
+          {{- range $key, $value := .Values.containers }}
+          - name: {{ $value.name }}
+            image: {{ $value.image.repository }}:{{ $value.image.tag }}
+            imagePullPolicy: {{ $value.image.pullPolicy }}
+            command: ["/scripts/{{ $value.name }}.sh"]
             env:
-            {{- range $key, $value := .Values.snapshot.extraEnvironmentVars }}
-            - name: {{ $key }}
-              value: {{ $value }}
+            {{- range $envKey, $envValue := $value.extraEnvironmentVars }}
+            - name: {{ $envKey }}
+              value: {{ $envValue }}
             {{- end }}
-            {{- range $key, $value := .Values.snapshot.extraSecretEnvironmentVars }}
-            - name: {{ $key }}
+            {{- range $envKey, $envValue := $value.extraSecretEnvironmentVars }}
+            - name: {{ $envKey }}
               valueFrom:
                 secretKeyRef:
-                  name: {{ $fullName }}
-                  key: {{ $key }}
+                  name: {{ $fullName }}-{{ $key }}
+                  key: {{ $envKey }}
             {{- end }}
             resources:
-              {{- toYaml .Values.snapshot.resources | nindent 14 }}
+              {{- toYaml $value.resources | nindent 14 }}
             volumeMounts:
             - name: scripts
               mountPath: /scripts
-            - name: snapshot
-              mountPath: /snapshot
-          - name: upload
-            image: {{ .Values.upload.image.repository }}:{{ .Values.upload.image.tag }}
-            imagePullPolicy: {{ .Values.upload.image.pullPolicy }}
-            command: ["/scripts/upload.sh"]
-            env:
-            {{- range $key, $value := .Values.upload.extraEnvironmentVars }}
-            - name: {{ $key }}
-              value: {{ $value }}
-            {{- end }}
-            {{- range $key, $value := .Values.upload.extraSecretEnvironmentVars }}
-            - name: {{ $key }}
-              valueFrom:
-                secretKeyRef:
-                  name: {{ $fullName }}
-                  key: {{ $key }}
-            {{- end }}
-            resources:
-              {{- toYaml .Values.upload.resources | nindent 14 }}
-            volumeMounts:
-            - name: scripts
-              mountPath: /scripts
-            - name: snapshot
-              mountPath: /snapshot
+            - name: backups
+              mountPath: /backups
+          {{- end }}
           volumes:
             - name: scripts
               configMap:
                 name: {{ include "cron-backup.fullname" . }}
                 defaultMode: 0777
-            - name: snapshot
+            - name: backups
               emptyDir: {}
