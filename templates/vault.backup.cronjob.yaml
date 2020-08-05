@@ -25,10 +25,13 @@ spec:
             imagePullPolicy: {{ $value.image.pullPolicy }}
             command: ["/scripts/{{ $value.name }}.sh"]
             env:
+            {{- if $value.extraEnvironmentVars }}
             {{- range $envKey, $envValue := $value.extraEnvironmentVars }}
             - name: {{ $envKey }}
               value: {{ $envValue }}
             {{- end }}
+            {{- end }}
+            {{- if $value.extraSecretEnvironmentVars }}
             {{- range $envKey, $envValue := $value.extraSecretEnvironmentVars }}
             - name: {{ $envKey }}
               valueFrom:
@@ -36,13 +39,16 @@ spec:
                   name: {{ $fullName }}-{{ $key }}
                   key: {{ $envKey }}
             {{- end }}
+            {{- end }}
+            {{- if $value.extraExistingSecretEnvironmentVars }}
             {{- range $envKey, $envValue := $value.extraExistingSecretEnvironmentVars }}
             - name: {{ $envKey }}
               valueFrom:
                 secretKeyRef:
                   name: {{ $envValue.secretName }}
                   key: {{ $envValue.secretKey }}
-            {{- end }}            
+            {{- end }}
+            {{- end }}           
             resources:
               {{- toYaml $value.resources | nindent 14 }}
             volumeMounts:
