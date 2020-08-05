@@ -1,0 +1,50 @@
+backup:
+  # This is the cron schedule expression
+  # See https://crontab.guru/ for editor/example
+  # Defaults to every hour
+  schedule: "0 */1 * * *"
+
+  # Timeout for pod to start
+  startingDeadlineSeconds: 120
+
+  # The number of pod restarts allowed before terminating the job as failed
+  backoffLimit: 3
+
+  # This is how long the backup process can run (including restarts) before the job controller kills it
+  activeDeadlineSeconds: 120
+snapshot:
+  image:
+    repository: bash
+    pullPolicy: IfNotPresent
+    tag: 5
+  resources: {}
+  extraEnvironmentVars: {}
+  extraSecretEnvironmentVars: {}
+  script: |
+    #!/bin/sh
+    set -eu
+    echo "Creating snapshot..."
+    touch /tmp/example
+    tar -czvf /tmp/snapshot.tar.gz /tmp/example
+    mv /tmp/snapshot.tar.gz /snapshot/snapshot.tar.gz
+    echo "Snapshot complete"
+upload:
+  image:
+    repository: amazon/aws-cli
+    pullPolicy: IfNotPresent
+    tag: 2.0.18
+  resources: {}
+  extraEnvironmentVars: {}
+  extraSecretEnvironmentVars: {}
+  script: |
+    #!/bin/sh
+    set -eu
+    while [ ! -f /snapshot/snapshot.tar.gz ]
+    do
+      echo "Waiting for snapshot to finish..."
+      sleep 1
+    done
+    # S3_KEY=database/{{ .Release.Namespace }}/{{ .Release.Name }}/snapshot_$(date +%Y%m%d_%H%M%S).snap
+    # echo "Uploading snapshot to ${AWS_S3_BUCKET}/${AWS_S3_KEY}"
+    # aws s3api put-object --bucket ${AWS_S3_BUCKET} --key ${AWS_S3_KEY} --body /snapshot/backup.snap
+    # echo "Upload Complete"

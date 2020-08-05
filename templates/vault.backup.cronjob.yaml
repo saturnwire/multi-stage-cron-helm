@@ -1,0 +1,74 @@
+{{- $fullName := include "cron-backup.fullname" . -}}
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  name: {{ include "cron-backup.fullname" . }}
+  labels:
+    {{ include "cron-backup.labels" . | nindent 4 }}
+spec:
+  schedule: {{ .Values.backup.schedule | quote }}
+  concurrencyPolicy: Forbid
+  startingDeadlineSeconds: {{ .Values.backup.startingDeadlineSeconds }}
+  jobTemplate:
+    spec:
+      backoffLimit: {{ .Values.backup.backoffLimit }}
+      activeDeadlineSeconds: {{ .Values.backup.activeDeadlineSeconds }}
+      parallelism: 1
+      completions: 1
+      template:
+        spec:
+          restartPolicy: OnFailure
+          containers:
+          - name: snapshot
+            image: {{ .Values.snapshot.image.repository }}:{{ .Values.snapshot.image.tag }}
+            imagePullPolicy: {{ .Values.snapshot.image.pullPolicy }}
+            command: ["/scripts/snapshot.sh"]
+            env:
+            {{- range $key, $value := .Values.snapshot.extraEnvironmentVars }}
+            - name: {{ $key }}
+              value: {{ $value }}
+            {{- end }}
+            {{- range $key, $value := .Values.snapshot.extraSecretEnvironmentVars }}
+            - name: {{ $key }}
+              valueFrom:
+                secretKeyRef:
+                  name: {{ $fullName }}
+                  key: {{ $key }}
+            {{- end }}
+            resources:
+              {{- toYaml .Values.snapshot.resources | nindent 14 }}
+            volumeMounts:
+            - name: scripts
+              mountPath: /scripts
+            - name: snapshot
+              mountPath: /snapshot
+          - name: upload
+            image: {{ .Values.upload.image.repository }}:{{ .Values.upload.image.tag }}
+            imagePullPolicy: {{ .Values.upload.image.pullPolicy }}
+            command: ["/scripts/upload.sh"]
+            env:
+            {{- range $key, $value := .Values.upload.extraEnvironmentVars }}
+            - name: {{ $key }}
+              value: {{ $value }}
+            {{- end }}
+            {{- range $key, $value := .Values.upload.extraSecretEnvironmentVars }}
+            - name: {{ $key }}
+              valueFrom:
+                secretKeyRef:
+                  name: {{ $fullName }}
+                  key: {{ $key }}
+            {{- end }}
+            resources:
+              {{- toYaml .Values.upload.resources | nindent 14 }}
+            volumeMounts:
+            - name: scripts
+              mountPath: /scripts
+            - name: snapshot
+              mountPath: /snapshot
+          volumes:
+            - name: scripts
+              configMap:
+                name: {{ include "cron-backup.fullname" . }}
+                defaultMode: 0777
+            - name: snapshot
+              emptyDir: {}
