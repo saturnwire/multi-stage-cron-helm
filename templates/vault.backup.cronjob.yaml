@@ -21,8 +21,8 @@ spec:
           containers:
           {{- range $key, $value := .Values.containers }}
           - name: {{ $value.name }}
-            image: {{ $value.image.repository }}:{{ $value.image.tag }}
-            imagePullPolicy: {{ $value.image.pullPolicy }}
+            image: {{ $value.image.repository }}:{{ $value.image.tag | default "latest" }}
+            imagePullPolicy: {{ $value.image.pullPolicy | default "Always" }}
             command: ["/scripts/{{ $value.name }}.sh"]
             env:
             {{- if $value.extraEnvironmentVars }}
