@@ -9,6 +9,8 @@ spec:
   schedule: {{ .Values.cron.schedule | quote }}
   concurrencyPolicy: Forbid
   startingDeadlineSeconds: {{ .Values.cron.startingDeadlineSeconds }}
+  successfulJobsHistoryLimit: {{ .Values.cron.successfulJobsHistoryLimit }}
+  failedJobsHistoryLimit: {{ .Values.cron.failedJobsHistoryLimit }}
   jobTemplate:
     spec:
       backoffLimit: {{ .Values.cron.backoffLimit }}

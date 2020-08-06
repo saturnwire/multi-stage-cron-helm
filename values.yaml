@@ -12,6 +12,9 @@ cron:
 
   # This is how long the job process can run (including restarts) before the job controller kills it
   activeDeadlineSeconds: 120
+
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 3
 containers:
 - name: snapshot
   image:
