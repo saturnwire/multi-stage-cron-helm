@@ -1,4 +1,4 @@
-backup:
+cron:
   # This is the cron schedule expression
   # See https://crontab.guru/ for editor/example
   # Defaults to every hour
@@ -10,7 +10,7 @@ backup:
   # The number of pod restarts allowed before terminating the job as failed
   backoffLimit: 3
 
-  # This is how long the backup process can run (including restarts) before the job controller kills it
+  # This is how long the job process can run (including restarts) before the job controller kills it
   activeDeadlineSeconds: 120
 containers:
 - name: snapshot

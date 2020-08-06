@@ -2,9 +2,9 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: {{ include "cron-backup.fullname" . }}
+  name: {{ include "multi-stage-cron.fullname" . }}
   labels:
-    {{ include "cron-backup.labels" . | nindent 4 }}
+    {{ include "multi-stage-cron.labels" . | nindent 4 }}
 data:
   {{- range $key, $value := .Values.containers }}
   {{ $value.name }}.sh: |

@@ -1,18 +1,18 @@
-{{- $fullName := include "cron-backup.fullname" . -}}
+{{- $fullName := include "multi-stage-cron.fullname" . -}}
 apiVersion: batch/v1beta1
 kind: CronJob
 metadata:
-  name: {{ include "cron-backup.fullname" . }}
+  name: {{ include "multi-stage-cron.fullname" . }}
   labels:
-    {{ include "cron-backup.labels" . | nindent 4 }}
+    {{ include "multi-stage-cron.labels" . | nindent 4 }}
 spec:
-  schedule: {{ .Values.backup.schedule | quote }}
+  schedule: {{ .Values.cron.schedule | quote }}
   concurrencyPolicy: Forbid
-  startingDeadlineSeconds: {{ .Values.backup.startingDeadlineSeconds }}
+  startingDeadlineSeconds: {{ .Values.cron.startingDeadlineSeconds }}
   jobTemplate:
     spec:
-      backoffLimit: {{ .Values.backup.backoffLimit }}
-      activeDeadlineSeconds: {{ .Values.backup.activeDeadlineSeconds }}
+      backoffLimit: {{ .Values.cron.backoffLimit }}
+      activeDeadlineSeconds: {{ .Values.cron.activeDeadlineSeconds }}
       parallelism: 1
       completions: 1
       template:
@@ -54,13 +54,13 @@ spec:
             volumeMounts:
             - name: scripts
               mountPath: /scripts
-            - name: backups
-              mountPath: /backups
+            - name: data
+              mountPath: /data
           {{- end }}
           volumes:
             - name: scripts
               configMap:
-                name: {{ include "cron-backup.fullname" . }}
+                name: {{ include "multi-stage-cron.fullname" . }}
                 defaultMode: 0777
-            - name: backups
+            - name: data
               emptyDir: {}
