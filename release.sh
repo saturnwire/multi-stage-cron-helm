@@ -24,14 +24,14 @@ echo "Creating helm package: ${helm_package}"
 helm package ./chart
 
 echo "Create release ${version} for repo: ${repo_full_name} branch: ${branch}"
-response=$(curl --silent --data "$(generate_post_data)" "https://api.github.com/repos/${repo_full_name}/releases?access_token=${token}")
+response=$(curl --data "$(generate_post_data)" "https://api.github.com/repos/${repo_full_name}/releases?access_token=${token}")
 
 # Get ID of the asset based on given filename.
 eval $(echo "${response}" | grep -m 1 "id.:" | grep -w id | tr : = | tr -cd '[[:alnum:]]=')
 [ "${id}" ] || { echo "Error: Failed to get release id for tag: ${tag}"; echo "${response}" | awk 'length($0)<100' >&2; exit 1; }
 
 echo "Uploading helm package to release with id: ${id}"
-response2=$(curl --silent \
+response2=$(curl \
 -H "Authorization: token ${token}" \
 -H "Content-Type: $(file -b --mime-type ${helm_package})" \
 --data-binary @${helm_package} \
