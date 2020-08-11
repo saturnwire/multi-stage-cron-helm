@@ -26,11 +26,6 @@ echo "Creating helm package: ${helm_package}"
 helm package ./chart
 
 echo "Create release ${version} for repo: ${repo_full_name} branch: ${branch}"
-echo curl --silent --data "$(generate_post_data)" "https://api.github.com/repos/${repo_full_name}/releases?access_token=${token}"
-re=$(curl --silent --data "$(generate_post_data)" "https://api.github.com/repos/${repo_full_name}/releases?access_token=${token}")
-echo ${re}
-
-exit
 id=$(curl --silent --data "$(generate_post_data)" "https://api.github.com/repos/${repo_full_name}/releases?access_token=${token}" | jq -r .id)
 
 # Get ID of the asset based on given filename.
