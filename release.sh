@@ -1,7 +1,6 @@
 #!/usr/bin/env bash
 set -eu -o pipefail
 
-text=${1:-'Update in [CHANGELOG](../../../blob/master/CHANGELOG.md).'}
 token=${GITHUB_TOKEN}
 repo_full_name=${GITHUB_REPOSITORY:-$(git config --local remote.origin.url|sed -n 's#.*\:\([^.]*\)\.git#\1#p')}
 branch=$(git rev-parse --abbrev-ref HEAD)
@@ -15,7 +14,6 @@ cat <<EOF
   "tag_name": "$version",
   "target_commitish": "$branch",
   "name": "$version",
-  "body": "$text",
   "draft": false,
   "prerelease": false
 }
@@ -26,14 +24,14 @@ echo "Creating helm package: ${helm_package}"
 helm package ./chart
 
 echo "Create release ${version} for repo: ${repo_full_name} branch: ${branch}"
-response=$(curl --data "$(generate_post_data)" "https://api.github.com/repos/${repo_full_name}/releases?access_token=${token}")
+response=$(curl --silent --data "$(generate_post_data)" "https://api.github.com/repos/${repo_full_name}/releases?access_token=${token}")
 
 # Get ID of the asset based on given filename.
 eval $(echo "${response}" | grep -m 1 "id.:" | grep -w id | tr : = | tr -cd '[[:alnum:]]=')
 [ "${id}" ] || { echo "Error: Failed to get release id for tag: ${tag}"; echo "${response}" | awk 'length($0)<100' >&2; exit 1; }
 
 echo "Uploading helm package to release with id: ${id}"
-response2=$(curl \
+response2=$(curl --silent \
 -H "Authorization: token ${token}" \
 -H "Content-Type: $(file -b --mime-type ${helm_package})" \
 --data-binary @${helm_package} \
