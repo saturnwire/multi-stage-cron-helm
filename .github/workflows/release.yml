@@ -1,4 +1,4 @@
-name: Release Charts
+name: Release Chart
 
 on:
   push:
@@ -16,3 +16,4 @@ jobs:
           ./release.sh
         env:	
           GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
+          HELM_CHARTS_DISPATCH_TOKEN: "${{ secrets.HELM_CHARTS_DISPATCH_TOKEN }}"

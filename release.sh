@@ -9,6 +9,7 @@ branch=$(git rev-parse --abbrev-ref HEAD)
 version=$(grep 'version:' ./chart/Chart.yaml | awk '{ print $2 }')
 name=$(grep 'name:' ./chart/Chart.yaml | awk '{ print $2 }')
 helm_package="${name}-${version}.tgz"
+index_repo="saturnwire/helm-charts"
 
 generate_post_data() {
 cat <<EOF
@@ -47,3 +48,12 @@ if [[ "${response}" != *"$SUB"* ]]; then
   echo "Error: Failed to upload file to release with id: ${id}"; echo "${response}"
   exit 1
 fi
+
+# Trigger the helm-charts repo to rebuild the index file
+repo_owner=$(echo $repo_full_name | cut -d'/' -f1)
+repo_name=$(echo $repo_full_name | cut -d'/' -f2)
+curl -X POST \
+	-H "Accept: application/vnd.github.everest-preview+json" \
+	-H "Content-Type: application/json" \
+	"https://api.github.com/repos/${index_repo}/actions/workflows/release.yml/dispatches?access_token=${HELM_CHARTS_DISPATCH_TOKEN}" -d '{"ref":"master","inputs":{"githubOwner":"${repo_owner}","githubRepo":"${repo_name}"}}'
+
