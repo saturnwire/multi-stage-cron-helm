@@ -10,10 +10,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v1
+        uses: actions/checkout@v2
       - name: Create release
         run: |
           ./release.sh
-        env:	
+        env:
           GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
           HELM_CHARTS_DISPATCH_TOKEN: "${{ secrets.HELM_CHARTS_DISPATCH_TOKEN }}"
