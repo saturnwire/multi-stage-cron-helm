@@ -55,5 +55,5 @@ repo_name=$(echo $repo_full_name | cut -d'/' -f2)
 curl -X POST \
 	-H "Accept: application/vnd.github.everest-preview+json" \
 	-H "Content-Type: application/json" \
-	"https://api.github.com/repos/${index_repo}/actions/workflows/release.yml/dispatches?access_token=${HELM_CHARTS_DISPATCH_TOKEN}" -d '{"ref":"master","inputs":{"githubOwner":"${repo_owner}","githubRepo":"${repo_name}"}}'
+	"https://api.github.com/repos/${index_repo}/actions/workflows/release.yml/dispatches?access_token=${HELM_CHARTS_DISPATCH_TOKEN}" -d '{"ref":"master","inputs":{"githubOwner":"'${repo_owner}'","githubRepo":"'${repo_name}'"}}'
 
