@@ -13,7 +13,9 @@ jobs:
         uses: actions/checkout@v2
       - name: Create release
         run: |
-          ./release.sh
+          curl -OL https://raw.githubusercontent.com/saturnwire/helm-charts/master/scripts/release.sh
+          chmod +x release.sh
+          ./release.sh          
         env:
           GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
           HELM_CHARTS_DISPATCH_TOKEN: "${{ secrets.HELM_CHARTS_DISPATCH_TOKEN }}"
