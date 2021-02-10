@@ -66,3 +66,8 @@ spec:
                 defaultMode: 0777
             - name: data
               emptyDir: {}
+          {{- if .Values.cron.createRole.enabled }}
+          serviceAccount: {{ template "multi-stage-cron.fullname" . }}-sa
+          serviceAccountName: {{ template "multi-stage-cron.fullname" . }}-sa
+          {{- end }}
+

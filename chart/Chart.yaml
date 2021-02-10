@@ -2,4 +2,4 @@ apiVersion: v2
 name: multi-stage-cron
 description: A generic Helm chart for running multi-stage processes using a K8s cronjobs
 type: application
-version: 0.1.5
+version: 0.2.0

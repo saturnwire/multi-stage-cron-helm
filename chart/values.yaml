@@ -15,6 +15,10 @@ cron:
 
   successfulJobsHistoryLimit: 3
   failedJobsHistoryLimit: 3
+  createRole:
+    enabled: false
+    serviceAccount:
+      annotations: {}
 containers:
 - name: snapshot
   image:
