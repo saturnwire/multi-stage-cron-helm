@@ -1,0 +1,41 @@
+{{- if .Values.cron.createRole.enabled }}
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: {{ template "multi-stage-cron.fullname" . }}-sa
+  namespace: {{ template "multi-stage-cron.namespace" . }}
+  labels:
+    {{ include "multi-stage-cron.labels" . | nindent 4 }}
+  {{- if .Values.cron.createRole.serviceAccount.annotations }}
+  annotations:
+    {{- toYaml .Values.cron.createRole.serviceAccount.annotations | nindent 4 }}
+  {{- end }}
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: {{ template "multi-stage-cron.fullname" . }}-role
+  namespace: {{ template "multi-stage-cron.namespace" . }}
+  labels:
+    {{ include "multi-stage-cron.labels" . | nindent 4 }}
+{{- if .Values.cron.createRole.role.rules }}
+rules:
+  {{- toYaml .Values.cron.createRole.role.rules | nindent 2 }}
+{{- end }}
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: {{ template "multi-stage-cron.fullname" . }}-rb
+  namespace: {{ template "multi-stage-cron.namespace" . }}
+  labels:
+    {{ include "multi-stage-cron.labels" . | nindent 4 }}
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: {{ template "multi-stage-cron.fullname" . }}-role
+subjects:
+- kind: ServiceAccount
+  name: {{ template "multi-stage-cron.fullname" . }}-sa
+  namespace: {{ template "multi-stage-cron.namespace" . }}
+{{- end }}
